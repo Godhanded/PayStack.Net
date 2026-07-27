@@ -7,7 +7,8 @@ namespace PayStack.Net;
 /// <summary>
 /// The <see cref="JsonSerializerOptions"/> shared by the Refit clients and the webhook event
 /// deserializer, so request/response payloads and webhook payloads round-trip identically.
-/// Paystack's JSON uses camelCase field names and string-encoded enums.
+/// Paystack's JSON uses snake_case field names (e.g. <c>authorization_url</c>,
+/// <c>recipient_code</c>) and string-encoded enums.
 /// </summary>
 public static class PayStackJsonOptions
 {
@@ -18,11 +19,11 @@ public static class PayStackJsonOptions
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
         };
-        options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
         options.Converters.Add(new LenientBooleanConverter());
         options.Converters.Add(new LenientNullableBooleanConverter());
         return options;
