@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <!--
+      Strip local absolute paths out of build outputs and
+      symbol files. Always on for Release/pack — not just gated on CI — so a package built on a
+      dev machine never leaks the machine's directory layout, whether or not $(CI) is set.
+    -->
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' OR '$(Configuration)' == 'Release'">true</ContinuousIntegrationBuild>
+    <!--
+      Belt-and-suspenders alongside SourceLink: SourceLink can only remap paths once the repo has a
+      git remote + commit, so on a fresh/uncommitted clone it's a no-op and the local absolute path
+      would otherwise still get embedded in the DLL/PDB. This unconditionally rewrites the repo root
+      to a neutral "/_/" placeholder regardless of git state, machine, or username.
+    -->
+    <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
+  </PropertyGroup>
+</Project>

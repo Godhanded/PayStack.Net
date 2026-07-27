@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore PayStack.Net.sln
+
+      - name: Build
+        run: dotnet build PayStack.Net.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/PayStack.Net.Tests/PayStack.Net.Tests.csproj --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Pack (validate packaging metadata)
+        run: dotnet pack src/PayStack.Net/PayStack.Net.csproj --no-build --configuration Release -o artifacts

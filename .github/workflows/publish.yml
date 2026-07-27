@@ -1,0 +1,57 @@
+name: Publish to NuGet
+
+# Runs only when a version tag is pushed (e.g. v1.0.0) - never on every push to master. This keeps
+# "who can publish a new package version" scoped to whoever can push a tag on this repo AND has
+# access to run it through the `nuget` GitHub Actions environment (see CONTRIBUTING.md
+# "Releasing"). Uses NuGet.org Trusted Publishing (OIDC) - no long-lived NUGET_API_KEY secret to
+# manage, leak, or rotate. See https://learn.microsoft.com/nuget/nuget-org/trusted-publishing.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Must match the "Environment" configured on the nuget.org Trusted Publishing policy exactly
+    # (see CONTRIBUTING.md) - NuGet checks this against the `environment` claim in the OIDC
+    # token GitHub issues, so an environment mismatch here means the token exchange is rejected
+    # even if everything else about the workflow matches.
+    environment: nuget
+    permissions:
+      id-token: write # required to request the GitHub OIDC token Trusted Publishing exchanges for a short-lived NuGet API key
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore PayStack.Net.sln
+
+      - name: Test
+        run: dotnet test tests/PayStack.Net.Tests/PayStack.Net.Tests.csproj -c Release
+
+      - name: Pack
+        # The tag (vX.Y.Z) drives the package version, not the csproj's hardcoded <Version> -
+        # keeps the two from silently drifting apart.
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet pack src/PayStack.Net/PayStack.Net.csproj -c Release -o artifacts -p:Version=$VERSION
+
+      - name: NuGet login (OIDC -> short-lived API key)
+        # Exchanges this job's GitHub OIDC token for a NuGet API key that's valid for 1 hour -
+        # requested here, right before the push step, so it can't expire before it's used.
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: Godand # nuget.org username/profile name - this is public on the package page already, not a secret
+
+      - name: Push to NuGet.org
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <RootNamespace>PayStack.Net</RootNamespace>
+    <AssemblyName>PayStack.Net</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet package metadata">
+    <!--
+      PackageId is NOT "PayStack.Net" - that id is already registered on nuget.org by an unrelated
+      author/package (github.com/adebisi-fa/paystack-dotnet). Assembly name, root namespace, repo
+      name, and solution name all stay "PayStack.Net" - only the globally-unique NuGet id differs.
+    -->
+    <PackageId>PayStackDotNet</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Godand</Authors>
+    <Description>A fully typed, production-ready .NET SDK for the Paystack API (https://paystack.com/docs/api/) — transactions, customers, subscriptions, plans, transfers, refunds, disputes, dedicated virtual accounts, webhooks and more. Built on Refit with resilient HttpClient pipelines.</Description>
+    <PackageTags>paystack;payments;sdk;api;refit;nigeria;africa;fintech</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Godhanded/PayStack.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Godhanded/PayStack.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>master</RepositoryBranch>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" Condition="Exists('..\..\README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+    <PackageReference Include="Polly.Core" Version="8.5.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+
+    <!--
+      Maps embedded/symbol source file paths to https://raw.githubusercontent.com/Godhanded/PayStack.Net/<commit-sha>/...
+      instead of the local machine's absolute disk path.
+      Only activates when the project is built inside the actual git repo (reads .git metadata) —
+      harmless no-op otherwise, e.g. before `git init`.
+    -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
